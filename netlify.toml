@@ -4,3 +4,5 @@
   status = 200
   force = true
 
+[functions.pesapal-register-ipn]
+verify_jwt = false
