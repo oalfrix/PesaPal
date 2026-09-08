@@ -107,6 +107,127 @@
   </div>
 
 
+  <!-- PAYMENT SUCCESS POPUP -->
+<div id="paymentSuccessPopup" class="payment-popup-overlay">
+
+  <div class="payment-popup">
+
+    <div class="success-icon">
+      ✓
+    </div>
+
+    <h2>Payment Successful!</h2>
+
+    <p>
+      Your payment has been received successfully.
+    </p>
+
+    <button id="closePaymentPopup">
+      Done
+    </button>
+
+  </div>
+
+</div>
+
+
+<style>
+  .payment-popup-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.65);
+    z-index: 99999;
+
+    align-items: center;
+    justify-content: center;
+
+    padding: 20px;
+  }
+
+  .payment-popup-overlay.show {
+    display: flex;
+  }
+
+  .payment-popup {
+    width: 100%;
+    max-width: 400px;
+    background: white;
+    border-radius: 20px;
+    padding: 35px 25px;
+    text-align: center;
+
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+
+    animation: popupAppear 0.3s ease;
+  }
+
+  @keyframes popupAppear {
+    from {
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+
+  .success-icon {
+    width: 75px;
+    height: 75px;
+
+    margin: 0 auto 20px;
+
+    border-radius: 50%;
+
+    background: #22c55e;
+    color: white;
+
+    font-size: 48px;
+    font-weight: bold;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .payment-popup h2 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    color: #111827;
+  }
+
+  .payment-popup p {
+    margin: 0 0 25px;
+    color: #6b7280;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+
+  .payment-popup button {
+    width: 100%;
+    padding: 14px 20px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #2563eb;
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    cursor: pointer;
+  }
+
+  .payment-popup button:hover {
+    opacity: 0.9;
+  }
+</style>
+
+
   <script src="app.js"></script>
 
 </body>

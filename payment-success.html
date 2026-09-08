@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Processing</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #f5f7fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .loading {
+      text-align: center;
+      color: #333;
+    }
+
+    .spinner {
+      width: 45px;
+      height: 45px;
+      border: 5px solid #ddd;
+      border-top: 5px solid #2563eb;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="loading">
+    <div class="spinner"></div>
+    <h2>Checking your payment...</h2>
+    <p>Please wait.</p>
+  </div>
+
+  <script>
+    const params = new URLSearchParams(window.location.search);
+
+    const trackingId =
+      params.get("OrderTrackingId");
+
+    const merchantReference =
+      params.get("OrderMerchantReference");
+
+    /*
+      Save payment information temporarily.
+      The main page will read this and show the popup.
+    */
+    sessionStorage.setItem(
+      "pesapal_payment_result",
+      JSON.stringify({
+        trackingId,
+        merchantReference,
+        timestamp: Date.now()
+      })
+    );
+
+    /*
+      Return to your main payment page.
+      CHANGE index.html if your main page has another filename.
+    */
+    window.location.replace("/");
+  </script>
+
+</body>
+</html>
