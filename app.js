@@ -9,10 +9,10 @@
 */
 
 const SUPABASE_URL =
-  "https://YOUR_PROJECT_REF.supabase.co";
+  "https://hoaeocddgcrdpjrmnxxm.supabase.co";
 
 const SUPABASE_ANON_KEY =
-  "YOUR_SUPABASE_PUBLISHABLE_KEY";
+  "sb_publishable_PYFCQ0sTuxyUNAPFPedBpQ_1IQvlJTc";
 
 
 /*
