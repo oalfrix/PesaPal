@@ -367,8 +367,7 @@ paymentForm.addEventListener(
        ELEMENTS
     ========================================= */
 
-    const paymentLoader =
-      document.getElementById("paymentLoader");
+   
 
     const loaderTitle =
       document.getElementById("loaderTitle");
