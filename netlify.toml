@@ -1,0 +1,6 @@
+[[redirects]]
+  from = "/pesapal-ipn"
+  to = "https://hoaeocddgcrdpjrmnxxm.supabase.co/functions/v1/pesapal-ipn"
+  status = 200
+  force = true
+
