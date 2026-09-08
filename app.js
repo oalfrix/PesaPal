@@ -1,11 +1,8 @@
-
+javascript
 /*
 |--------------------------------------------------------------------------
 | Supabase Configuration
 |--------------------------------------------------------------------------
-|
-| Replace these with your actual Supabase project details.
-|
 */
 
 const SUPABASE_URL =
@@ -81,9 +78,36 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Validate Amount
+    | Validate Form
     |--------------------------------------------------------------------------
     */
+
+    if (!name) {
+
+      message.textContent =
+        "Please enter your full name.";
+
+      return;
+    }
+
+
+    if (!email) {
+
+      message.textContent =
+        "Please enter your email address.";
+
+      return;
+    }
+
+
+    if (!phone) {
+
+      message.textContent =
+        "Please enter your phone number.";
+
+      return;
+    }
+
 
     if (!amount || amount <= 0) {
 
@@ -96,7 +120,7 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Show Loading
+    | Show Payment Loader
     |--------------------------------------------------------------------------
     */
 
@@ -114,7 +138,7 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Send Payment Request
+    | Send Payment Request To Supabase
     |--------------------------------------------------------------------------
     */
 
@@ -202,23 +226,27 @@ paymentForm.addEventListener(
 
       /*
       |--------------------------------------------------------------------------
-      | Save Order Information
+      | Save Payment Information
       |--------------------------------------------------------------------------
+      |
+      | sessionStorage is used because we only need this information
+      | while the customer is completing this payment.
+      |
       */
 
-      localStorage.setItem(
+      sessionStorage.setItem(
 
-        "pesapal_order",
+        "pesapal_payment_result",
 
         JSON.stringify({
 
-          order_id:
+          orderId:
             data.order_id,
 
-          merchant_reference:
+          merchantReference:
             data.merchant_reference,
 
-          tracking_id:
+          trackingId:
             data.order_tracking_id
 
         })
@@ -228,7 +256,40 @@ paymentForm.addEventListener(
 
       /*
       |--------------------------------------------------------------------------
-      | Redirect To PesaPal
+      | Update Loader
+      |--------------------------------------------------------------------------
+      */
+
+      const loaderTitle =
+        document.getElementById(
+          "loaderTitle"
+        );
+
+      const loaderMessage =
+        document.getElementById(
+          "loaderMessage"
+        );
+
+
+      if (loaderTitle) {
+
+        loaderTitle.textContent =
+          "Opening PesaPal";
+
+      }
+
+
+      if (loaderMessage) {
+
+        loaderMessage.textContent =
+          "Please complete your payment. You will automatically return here when finished.";
+
+      }
+
+
+      /*
+      |--------------------------------------------------------------------------
+      | Open PesaPal Checkout
       |--------------------------------------------------------------------------
       */
 
@@ -265,7 +326,7 @@ paymentForm.addEventListener(
 
       /*
       |--------------------------------------------------------------------------
-      | Enable Button
+      | Enable Payment Button
       |--------------------------------------------------------------------------
       */
 
@@ -289,3 +350,4 @@ paymentForm.addEventListener(
 
   }
 );
+
