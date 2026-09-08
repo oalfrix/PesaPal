@@ -1,0 +1,230 @@
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif;
+
+  background: #f5f7fa;
+
+  min-height: 100vh;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+}
+
+.payment-container {
+  width: 100%;
+
+  max-width: 500px;
+
+  padding: 20px;
+}
+
+.payment-card {
+  background: #ffffff;
+
+  padding: 35px;
+
+  border-radius: 16px;
+
+  box-shadow:
+    0 10px 40px rgba(0, 0, 0, 0.08);
+}
+
+.payment-card h1 {
+  margin: 0 0 10px;
+
+  text-align: center;
+
+  font-size: 28px;
+}
+
+.subtitle {
+  margin: 0 0 30px;
+
+  text-align: center;
+
+  color: #666;
+
+  line-height: 1.5;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+
+  margin-bottom: 8px;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  color: #333;
+}
+
+.form-group input {
+  width: 100%;
+
+  padding: 14px;
+
+  border: 1px solid #ddd;
+
+  border-radius: 8px;
+
+  font-size: 16px;
+
+  outline: none;
+
+  transition: border-color 0.2s;
+}
+
+.form-group input:focus {
+  border-color: #111;
+}
+
+#payButton {
+  width: 100%;
+
+  padding: 15px;
+
+  border: none;
+
+  border-radius: 8px;
+
+  background: #111;
+
+  color: #fff;
+
+  font-size: 16px;
+
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    opacity 0.2s,
+    transform 0.2s;
+}
+
+#payButton:hover {
+  opacity: 0.9;
+}
+
+#payButton:active {
+  transform: scale(0.98);
+}
+
+#payButton:disabled {
+  opacity: 0.6;
+
+  cursor: not-allowed;
+}
+
+#message {
+  margin-top: 15px;
+
+  text-align: center;
+
+  color: #d00;
+}
+
+
+/* =========================
+   PAYMENT LOADER
+   ========================= */
+
+.payment-loader {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9999;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  padding: 20px;
+
+  background:
+    rgba(0, 0, 0, 0.65);
+}
+
+.payment-loader.hidden {
+  display: none;
+}
+
+.loader-box {
+  width: 100%;
+
+  max-width: 360px;
+
+  padding: 35px 25px;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+
+  text-align: center;
+
+  box-shadow:
+    0 15px 50px rgba(0, 0, 0, 0.2);
+}
+
+.spinner {
+  width: 48px;
+
+  height: 48px;
+
+  margin: 0 auto 20px;
+
+  border: 5px solid #e5e5e5;
+
+  border-top-color: #111;
+
+  border-radius: 50%;
+
+  animation:
+    paymentSpin 0.8s linear infinite;
+}
+
+.loader-box h3 {
+  margin: 0 0 8px;
+
+  font-size: 20px;
+}
+
+.loader-box p {
+  margin: 0;
+
+  color: #666;
+
+  line-height: 1.5;
+}
+
+@keyframes paymentSpin {
+
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+
+}
