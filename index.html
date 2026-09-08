@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -9,19 +10,20 @@
   <link rel="stylesheet" href="style.css">
 
   <style>
-    /* =========================
-       PAYMENT LOADER
-    ========================= */
+    /* ==============================
+       PAYMENT LOADING POPUP
+    ============================== */
 
     .payment-loader {
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      z-index: 99998;
+      z-index: 99999;
 
       display: flex;
       align-items: center;
       justify-content: center;
+
+      background: rgba(0, 0, 0, 0.65);
 
       padding: 20px;
     }
@@ -32,42 +34,30 @@
 
     .loader-box {
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
 
-      background: white;
+      background: #ffffff;
       border-radius: 20px;
 
       padding: 35px 25px;
 
       text-align: center;
 
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-    }
-
-    .loader-box h3 {
-      margin: 20px 0 10px;
-      font-size: 24px;
-      color: #111827;
-    }
-
-    .loader-box p {
-      margin: 0;
-      color: #6b7280;
-      line-height: 1.5;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
     }
 
     .spinner {
-      width: 50px;
-      height: 50px;
+      width: 52px;
+      height: 52px;
+
+      margin: 0 auto 20px;
 
       border: 5px solid #e5e7eb;
-      border-top: 5px solid #2563eb;
+      border-top-color: #2563eb;
 
       border-radius: 50%;
 
       animation: spin 1s linear infinite;
-
-      margin: 0 auto;
     }
 
     @keyframes spin {
@@ -76,23 +66,38 @@
       }
     }
 
+    .loader-box h3 {
+      margin: 0 0 10px;
 
-    /* =========================
-       SUCCESS POPUP
-    ========================= */
+      font-size: 24px;
+
+      color: #111827;
+    }
+
+    .loader-box p {
+      margin: 0;
+
+      color: #6b7280;
+
+      line-height: 1.5;
+    }
+
+
+    /* ==============================
+       SUCCESS / FAILED POPUP
+    ============================== */
 
     .payment-popup-overlay {
-      display: none;
-
       position: fixed;
       inset: 0;
+      z-index: 100000;
 
-      background: rgba(0, 0, 0, 0.65);
-
-      z-index: 99999;
+      display: none;
 
       align-items: center;
       justify-content: center;
+
+      background: rgba(0, 0, 0, 0.65);
 
       padding: 20px;
     }
@@ -103,9 +108,9 @@
 
     .payment-popup {
       width: 100%;
-      max-width: 400px;
+      max-width: 380px;
 
-      background: white;
+      background: #ffffff;
 
       border-radius: 20px;
 
@@ -113,15 +118,15 @@
 
       text-align: center;
 
-      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
 
-      animation: popupAppear 0.3s ease;
+      animation: popupIn 0.25s ease;
     }
 
-    @keyframes popupAppear {
+    @keyframes popupIn {
       from {
         opacity: 0;
-        transform: scale(0.8);
+        transform: scale(0.85);
       }
 
       to {
@@ -130,7 +135,7 @@
       }
     }
 
-    .success-icon {
+    .popup-icon {
       width: 75px;
       height: 75px;
 
@@ -138,32 +143,36 @@
 
       border-radius: 50%;
 
-      background: #22c55e;
-
-      color: white;
-
-      font-size: 48px;
-      font-weight: bold;
-
       display: flex;
       align-items: center;
       justify-content: center;
+
+      color: #ffffff;
+
+      font-size: 45px;
+      font-weight: bold;
+    }
+
+    .success-icon {
+      background: #22c55e;
+    }
+
+    .failed-icon {
+      background: #ef4444;
     }
 
     .payment-popup h2 {
       margin: 0 0 12px;
 
-      font-size: 28px;
-
       color: #111827;
+
+      font-size: 27px;
     }
 
     .payment-popup p {
       margin: 0 0 25px;
 
       color: #6b7280;
-
-      font-size: 16px;
 
       line-height: 1.5;
     }
@@ -174,15 +183,13 @@
       padding: 14px 20px;
 
       border: none;
-
       border-radius: 10px;
 
       background: #2563eb;
 
-      color: white;
+      color: #ffffff;
 
       font-size: 16px;
-
       font-weight: bold;
 
       cursor: pointer;
@@ -190,31 +197,6 @@
 
     .payment-popup button:hover {
       opacity: 0.9;
-    }
-
-
-    /* =========================
-       FAILED PAYMENT POPUP
-    ========================= */
-
-    .failed-icon {
-      width: 75px;
-      height: 75px;
-
-      margin: 0 auto 20px;
-
-      border-radius: 50%;
-
-      background: #ef4444;
-
-      color: white;
-
-      font-size: 42px;
-      font-weight: bold;
-
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
   </style>
 </head>
@@ -231,6 +213,7 @@
       <p class="subtitle">
         Enter your details to continue with payment.
       </p>
+
 
       <form id="paymentForm">
 
@@ -317,9 +300,9 @@
   </main>
 
 
-  <!-- =========================
-       PAYMENT LOADING POPUP
-  ========================= -->
+  <!-- ==============================
+       LOADING POPUP
+  ============================== -->
 
   <div
     id="paymentLoader"
@@ -335,7 +318,7 @@
       </h3>
 
       <p id="loaderMessage">
-        Please wait while we connect you to PesaPal...
+        Please wait...
       </p>
 
     </div>
@@ -343,9 +326,9 @@
   </div>
 
 
-  <!-- =========================
+  <!-- ==============================
        SUCCESS POPUP
-  ========================= -->
+  ============================== -->
 
   <div
     id="paymentSuccessPopup"
@@ -354,7 +337,7 @@
 
     <div class="payment-popup">
 
-      <div class="success-icon">
+      <div class="popup-icon success-icon">
         ✓
       </div>
 
@@ -366,7 +349,7 @@
         Your payment has been received successfully.
       </p>
 
-      <button id="closePaymentPopup">
+      <button id="closeSuccessPopup">
         Done
       </button>
 
@@ -375,9 +358,9 @@
   </div>
 
 
-  <!-- =========================
+  <!-- ==============================
        FAILED POPUP
-  ========================= -->
+  ============================== -->
 
   <div
     id="paymentFailedPopup"
@@ -386,7 +369,7 @@
 
     <div class="payment-popup">
 
-      <div class="failed-icon">
+      <div class="popup-icon failed-icon">
         ×
       </div>
 
@@ -395,7 +378,8 @@
       </h2>
 
       <p>
-        Your payment was not completed. Please try again.
+        Your payment was not completed.
+        Please try again.
       </p>
 
       <button id="closeFailedPopup">
@@ -407,7 +391,7 @@
   </div>
 
 
-
+  <!-- ONLY ONE JAVASCRIPT FILE -->
 
   <script src="app.js"></script>
 

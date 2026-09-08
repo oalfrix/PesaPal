@@ -1,7 +1,7 @@
-javascript
+
 /*
 |--------------------------------------------------------------------------
-| Supabase Configuration
+| SUPABASE
 |--------------------------------------------------------------------------
 */
 
@@ -14,7 +14,20 @@ const SUPABASE_ANON_KEY =
 
 /*
 |--------------------------------------------------------------------------
-| Elements
+| SUPABASE FUNCTIONS
+|--------------------------------------------------------------------------
+*/
+
+const CREATE_ORDER_URL =
+  `${SUPABASE_URL}/functions/v1/pesapal-create-order`;
+
+const STATUS_URL =
+  `${SUPABASE_URL}/functions/v1/pesapal-status`;
+
+
+/*
+|--------------------------------------------------------------------------
+| ELEMENTS
 |--------------------------------------------------------------------------
 */
 
@@ -30,10 +43,418 @@ const message =
 const paymentLoader =
   document.getElementById("paymentLoader");
 
+const loaderTitle =
+  document.getElementById("loaderTitle");
+
+const loaderMessage =
+  document.getElementById("loaderMessage");
+
+const successPopup =
+  document.getElementById("paymentSuccessPopup");
+
+const failedPopup =
+  document.getElementById("paymentFailedPopup");
+
+const closeSuccess =
+  document.getElementById("closeSuccessPopup");
+
+const closeFailed =
+  document.getElementById("closeFailedPopup");
+
 
 /*
 |--------------------------------------------------------------------------
-| Payment Form
+| LOADER
+|--------------------------------------------------------------------------
+*/
+
+function showLoader(title, text) {
+
+  loaderTitle.textContent =
+    title || "Processing Payment";
+
+  loaderMessage.textContent =
+    text || "Please wait...";
+
+  paymentLoader.classList.remove(
+    "hidden"
+  );
+}
+
+
+function hideLoader() {
+
+  paymentLoader.classList.add(
+    "hidden"
+  );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| SUCCESS POPUP
+|--------------------------------------------------------------------------
+*/
+
+function showSuccess() {
+
+  hideLoader();
+
+  successPopup.classList.add(
+    "show"
+  );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| FAILED POPUP
+|--------------------------------------------------------------------------
+*/
+
+function showFailed() {
+
+  hideLoader();
+
+  failedPopup.classList.add(
+    "show"
+  );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CLEAN URL
+|--------------------------------------------------------------------------
+*/
+
+function cleanUrl() {
+
+  window.history.replaceState(
+    {},
+    document.title,
+    window.location.pathname
+  );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CLOSE SUCCESS
+|--------------------------------------------------------------------------
+*/
+
+closeSuccess.addEventListener(
+  "click",
+  function () {
+
+    successPopup.classList.remove(
+      "show"
+    );
+
+    sessionStorage.removeItem(
+      "pesapal_payment"
+    );
+
+    paymentForm.reset();
+
+    payButton.disabled = false;
+
+    payButton.textContent =
+      "Pay with PesaPal";
+
+    cleanUrl();
+
+  }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| CLOSE FAILED
+|--------------------------------------------------------------------------
+*/
+
+closeFailed.addEventListener(
+  "click",
+  function () {
+
+    failedPopup.classList.remove(
+      "show"
+    );
+
+    sessionStorage.removeItem(
+      "pesapal_payment"
+    );
+
+    paymentForm.reset();
+
+    payButton.disabled = false;
+
+    payButton.textContent =
+      "Pay with PesaPal";
+
+    message.textContent = "";
+
+    cleanUrl();
+
+  }
+);
+
+
+/*
+|--------------------------------------------------------------------------
+| CHECK PAYMENT STATUS
+|--------------------------------------------------------------------------
+*/
+
+async function checkPaymentStatus(
+  trackingId
+) {
+
+  if (!trackingId) {
+    return;
+  }
+
+
+  try {
+
+    showLoader(
+      "Confirming Payment",
+      "Please wait while we confirm your payment..."
+    );
+
+
+    const response =
+      await fetch(
+        `${STATUS_URL}?OrderTrackingId=${encodeURIComponent(
+          trackingId
+        )}`
+      );
+
+
+    const data =
+      await response.json();
+
+
+    console.log(
+      "Payment Status:",
+      data
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | PAID
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      data.status === "PAID"
+    ) {
+
+      sessionStorage.removeItem(
+        "pesapal_payment"
+      );
+
+      showSuccess();
+
+      return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | FAILED
+    |--------------------------------------------------------------------------
+    */
+
+    if (
+      data.status === "FAILED" ||
+      data.status === "INVALID"
+    ) {
+
+      sessionStorage.removeItem(
+        "pesapal_payment"
+      );
+
+      showFailed();
+
+      return;
+
+    }
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | STILL PROCESSING
+    |--------------------------------------------------------------------------
+    */
+
+    setTimeout(
+      function () {
+
+        checkPaymentStatus(
+          trackingId
+        );
+
+      },
+      3000
+    );
+
+  }
+
+  catch (error) {
+
+    console.error(
+      "Status check error:",
+      error
+    );
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | RETRY
+    |--------------------------------------------------------------------------
+    */
+
+    setTimeout(
+      function () {
+
+        checkPaymentStatus(
+          trackingId
+        );
+
+      },
+      3000
+    );
+
+  }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| CHECK IF CUSTOMER RETURNED FROM PESAPAL
+|--------------------------------------------------------------------------
+*/
+
+const params =
+  new URLSearchParams(
+    window.location.search
+  );
+
+
+const trackingId =
+  params.get(
+    "OrderTrackingId"
+  );
+
+
+const merchantReference =
+  params.get(
+    "OrderMerchantReference"
+  );
+
+
+if (trackingId) {
+
+  console.log(
+    "Returned from PesaPal:",
+    trackingId
+  );
+
+
+  sessionStorage.setItem(
+
+    "pesapal_payment",
+
+    JSON.stringify({
+
+      trackingId:
+        trackingId,
+
+      merchantReference:
+        merchantReference
+
+    })
+
+  );
+
+
+  cleanUrl();
+
+
+  checkPaymentStatus(
+    trackingId
+  );
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| RESTORE PAYMENT CHECK
+|--------------------------------------------------------------------------
+*/
+
+if (!trackingId) {
+
+  const saved =
+    sessionStorage.getItem(
+      "pesapal_payment"
+    );
+
+
+  if (saved) {
+
+    try {
+
+      const payment =
+        JSON.parse(
+          saved
+        );
+
+
+      if (
+        payment.trackingId
+      ) {
+
+        checkPaymentStatus(
+          payment.trackingId
+        );
+
+      }
+
+    }
+
+    catch (error) {
+
+      console.error(
+        "Invalid payment data:",
+        error
+      );
+
+      sessionStorage.removeItem(
+        "pesapal_payment"
+      );
+
+    }
+
+  }
+
+}
+
+
+/*
+|--------------------------------------------------------------------------
+| PAYMENT FORM
 |--------------------------------------------------------------------------
 */
 
@@ -46,7 +467,7 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Get Form Values
+    | GET VALUES
     |--------------------------------------------------------------------------
     */
 
@@ -56,17 +477,20 @@ paymentForm.addEventListener(
         .value
         .trim();
 
+
     const email =
       document
         .getElementById("email")
         .value
         .trim();
 
+
     const phone =
       document
         .getElementById("phone")
         .value
         .trim();
+
 
     const amount =
       Number(
@@ -78,7 +502,7 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Validate Form
+    | VALIDATION
     |--------------------------------------------------------------------------
     */
 
@@ -88,6 +512,7 @@ paymentForm.addEventListener(
         "Please enter your full name.";
 
       return;
+
     }
 
 
@@ -97,6 +522,7 @@ paymentForm.addEventListener(
         "Please enter your email address.";
 
       return;
+
     }
 
 
@@ -106,27 +532,34 @@ paymentForm.addEventListener(
         "Please enter your phone number.";
 
       return;
+
     }
 
 
-    if (!amount || amount <= 0) {
+    if (
+      !Number.isFinite(amount) ||
+      amount <= 0
+    ) {
 
       message.textContent =
         "Please enter a valid amount.";
 
       return;
+
     }
 
 
     /*
     |--------------------------------------------------------------------------
-    | Show Payment Loader
+    | SHOW LOADING POPUP IMMEDIATELY
     |--------------------------------------------------------------------------
     */
 
-    paymentLoader.classList.remove(
-      "hidden"
+    showLoader(
+      "Processing Payment",
+      "Please wait while we prepare your payment..."
     );
+
 
     payButton.disabled = true;
 
@@ -138,7 +571,7 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Send Payment Request To Supabase
+    | CREATE ORDER
     |--------------------------------------------------------------------------
     */
 
@@ -146,10 +579,9 @@ paymentForm.addEventListener(
 
       const response =
         await fetch(
-
-          `${SUPABASE_URL}/functions/v1/pesapal-create-order`,
-
+          CREATE_ORDER_URL,
           {
+
             method: "POST",
 
             headers: {
@@ -167,7 +599,8 @@ paymentForm.addEventListener(
 
             body: JSON.stringify({
 
-              amount: amount,
+              amount:
+                amount,
 
               description:
                 "Website Payment",
@@ -184,13 +617,12 @@ paymentForm.addEventListener(
             })
 
           }
-
         );
 
 
       /*
       |--------------------------------------------------------------------------
-      | Read Response
+      | READ RESPONSE
       |--------------------------------------------------------------------------
       */
 
@@ -199,14 +631,14 @@ paymentForm.addEventListener(
 
 
       console.log(
-        "PesaPal Response:",
+        "Create Order Response:",
         data
       );
 
 
       /*
       |--------------------------------------------------------------------------
-      | Check Response
+      | CHECK RESPONSE
       |--------------------------------------------------------------------------
       */
 
@@ -226,17 +658,13 @@ paymentForm.addEventListener(
 
       /*
       |--------------------------------------------------------------------------
-      | Save Payment Information
+      | SAVE PAYMENT
       |--------------------------------------------------------------------------
-      |
-      | sessionStorage is used because we only need this information
-      | while the customer is completing this payment.
-      |
       */
 
       sessionStorage.setItem(
 
-        "pesapal_payment_result",
+        "pesapal_payment",
 
         JSON.stringify({
 
@@ -256,40 +684,20 @@ paymentForm.addEventListener(
 
       /*
       |--------------------------------------------------------------------------
-      | Update Loader
+      | UPDATE LOADER
       |--------------------------------------------------------------------------
       */
 
-      const loaderTitle =
-        document.getElementById(
-          "loaderTitle"
-        );
+      loaderTitle.textContent =
+        "Opening PesaPal";
 
-      const loaderMessage =
-        document.getElementById(
-          "loaderMessage"
-        );
-
-
-      if (loaderTitle) {
-
-        loaderTitle.textContent =
-          "Opening PesaPal";
-
-      }
-
-
-      if (loaderMessage) {
-
-        loaderMessage.textContent =
-          "Please complete your payment. You will automatically return here when finished.";
-
-      }
+      loaderMessage.textContent =
+        "Please complete your payment. You will return here automatically.";
 
 
       /*
       |--------------------------------------------------------------------------
-      | Open PesaPal Checkout
+      | OPEN PESAPAL
       |--------------------------------------------------------------------------
       */
 
@@ -301,7 +709,7 @@ paymentForm.addEventListener(
 
     /*
     |--------------------------------------------------------------------------
-    | Handle Errors
+    | ERROR
     |--------------------------------------------------------------------------
     */
 
@@ -313,34 +721,15 @@ paymentForm.addEventListener(
       );
 
 
-      /*
-      |--------------------------------------------------------------------------
-      | Hide Loader
-      |--------------------------------------------------------------------------
-      */
-
-      paymentLoader.classList.add(
-        "hidden"
-      );
+      hideLoader();
 
 
-      /*
-      |--------------------------------------------------------------------------
-      | Enable Payment Button
-      |--------------------------------------------------------------------------
-      */
-
-      payButton.disabled = false;
+      payButton.disabled =
+        false;
 
       payButton.textContent =
         "Pay with PesaPal";
 
-
-      /*
-      |--------------------------------------------------------------------------
-      | Show Error
-      |--------------------------------------------------------------------------
-      */
 
       message.textContent =
         error.message ||
@@ -350,390 +739,3 @@ paymentForm.addEventListener(
 
   }
 );
-
-
-
-  
-
-    /* =========================================
-       SUPABASE PAYMENT STATUS FUNCTION
-    ========================================= */
-
-    const SUPABASE_STATUS_URL =
-      "https://hoaeocddgcrdpjrmnxxm.supabase.co/functions/v1/pesapal-status";
-
-
-    /* =========================================
-       ELEMENTS
-    ========================================= */
-
-   
-
-    const loaderTitle =
-      document.getElementById("loaderTitle");
-
-    const loaderMessage =
-      document.getElementById("loaderMessage");
-
-    const paymentPopup =
-      document.getElementById("paymentSuccessPopup");
-
-    const failedPopup =
-      document.getElementById("paymentFailedPopup");
-
-
-    const closePaymentPopup =
-      document.getElementById("closePaymentPopup");
-
-    const closeFailedPopup =
-      document.getElementById("closeFailedPopup");
-
-
-    /* =========================================
-       SHOW LOADER
-    ========================================= */
-
-    function showLoader(
-      title = "Processing Payment",
-      message = "Please wait..."
-    ) {
-
-      loaderTitle.textContent = title;
-
-      loaderMessage.textContent = message;
-
-      paymentLoader.classList.remove("hidden");
-    }
-
-
-    /* =========================================
-       HIDE LOADER
-    ========================================= */
-
-    function hideLoader() {
-
-      paymentLoader.classList.add("hidden");
-    }
-
-
-    /* =========================================
-       SUCCESS POPUP
-    ========================================= */
-
-    function showSuccessPopup() {
-
-      hideLoader();
-
-      paymentPopup.classList.add("show");
-    }
-
-
-    /* =========================================
-       FAILED POPUP
-    ========================================= */
-
-    function showFailedPopup() {
-
-      hideLoader();
-
-      failedPopup.classList.add("show");
-    }
-
-
-    /* =========================================
-       CLOSE SUCCESS
-    ========================================= */
-
-    closePaymentPopup.addEventListener(
-      "click",
-      () => {
-
-        paymentPopup.classList.remove("show");
-
-        sessionStorage.removeItem(
-          "pesapal_payment_result"
-        );
-
-        /*
-          Remove PesaPal parameters from
-          the browser address bar.
-        */
-
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }
-    );
-
-
-    /* =========================================
-       CLOSE FAILED
-    ========================================= */
-
-    closeFailedPopup.addEventListener(
-      "click",
-      () => {
-
-        failedPopup.classList.remove("show");
-
-        sessionStorage.removeItem(
-          "pesapal_payment_result"
-        );
-
-        window.history.replaceState(
-          {},
-          document.title,
-          window.location.pathname
-        );
-      }
-    );
-
-
-    /* =========================================
-       GET PESAPAL CALLBACK DATA
-    ========================================= */
-
-    const urlParams =
-      new URLSearchParams(
-        window.location.search
-      );
-
-
-    const trackingId =
-      urlParams.get(
-        "OrderTrackingId"
-      );
-
-
-    const merchantReference =
-      urlParams.get(
-        "OrderMerchantReference"
-      );
-
-
-    /* =========================================
-       PAYMENT RETURNED FROM PESAPAL
-    ========================================= */
-
-    if (trackingId) {
-
-      console.log(
-        "PesaPal returned tracking ID:",
-        trackingId
-      );
-
-
-      /*
-        Save it in case the page refreshes.
-      */
-
-      sessionStorage.setItem(
-        "pesapal_payment_result",
-
-        JSON.stringify({
-          trackingId,
-          merchantReference,
-          timestamp: Date.now()
-        })
-      );
-
-
-      /*
-        Start verification.
-      */
-
-      checkPaymentStatus(
-        trackingId
-      );
-
-    }
-
-
-    /* =========================================
-       CHECK PAYMENT STATUS
-    ========================================= */
-
-    async function checkPaymentStatus(
-      currentTrackingId
-    ) {
-
-      try {
-
-        showLoader(
-          "Confirming Payment",
-          "Please wait while we confirm your payment..."
-        );
-
-
-        const response =
-          await fetch(
-            `${SUPABASE_STATUS_URL}?OrderTrackingId=${encodeURIComponent(
-              currentTrackingId
-            )}`
-          );
-
-
-        const data =
-          await response.json();
-
-
-        console.log(
-          "Payment status:",
-          data
-        );
-
-
-        /*
-          SUCCESS
-        */
-
-        if (
-          data.status === "PAID"
-        ) {
-
-          showSuccessPopup();
-
-          sessionStorage.removeItem(
-            "pesapal_payment_result"
-          );
-
-          return;
-        }
-
-
-        /*
-          FAILED
-        */
-
-        if (
-          data.status === "FAILED" ||
-          data.status === "INVALID"
-        ) {
-
-          showFailedPopup();
-
-          sessionStorage.removeItem(
-            "pesapal_payment_result"
-          );
-
-          return;
-        }
-
-
-        /*
-          STILL PROCESSING
-        */
-
-        setTimeout(
-          () => {
-
-            checkPaymentStatus(
-              currentTrackingId
-            );
-
-          },
-          3000
-        );
-
-      }
-
-      catch (error) {
-
-        console.error(
-          "Payment status error:",
-          error
-        );
-
-
-        /*
-          Retry automatically.
-        */
-
-        setTimeout(
-          () => {
-
-            checkPaymentStatus(
-              currentTrackingId
-            );
-
-          },
-          3000
-        );
-
-      }
-
-    }
-
-
-    /* =========================================
-       CHECK SAVED PAYMENT
-       AFTER REFRESH
-    ========================================= */
-
-    if (!trackingId) {
-
-      const savedPayment =
-        sessionStorage.getItem(
-          "pesapal_payment_result"
-        );
-
-
-      if (savedPayment) {
-
-        try {
-
-          const payment =
-            JSON.parse(
-              savedPayment
-            );
-
-
-          if (
-            payment.trackingId
-          ) {
-
-            checkPaymentStatus(
-              payment.trackingId
-            );
-
-          }
-
-        }
-
-        catch (error) {
-
-          console.error(
-            "Invalid saved payment:",
-            error
-          );
-
-          sessionStorage.removeItem(
-            "pesapal_payment_result"
-          );
-
-        }
-
-      }
-
-    }
-
-
-    /* =========================================
-       CLEAN URL
-       ========================================= */
-
-    if (
-      trackingId
-    ) {
-
-      window.history.replaceState(
-        {},
-        document.title,
-        window.location.pathname
-      );
-
-    }
-
-  
