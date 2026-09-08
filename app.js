@@ -1,4 +1,4 @@
-```javascript
+
 /*
 |--------------------------------------------------------------------------
 | Supabase Configuration
@@ -289,4 +289,3 @@ paymentForm.addEventListener(
 
   }
 );
-```
